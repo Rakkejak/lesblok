@@ -29,6 +29,9 @@
   button.type = 'button';
   button.id = 'supportStrip';
   button.className = 'supportStrip';
-  button.textContent = 'content? geef ons 0,17 € voor de moeite.';
+  button.textContent = 'content? geef ons 0,51 € voor de moeite.';
+  button.addEventListener('click', () => {
+    window.open('https://buy.stripe.com/5kQ7sL3uBb0Najyf3HgA801', '_blank', 'noopener,noreferrer');
+  });
   modal.appendChild(button);
 })();
