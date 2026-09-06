@@ -77,10 +77,11 @@
   .lessonIdentity{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 10px}.fieldCard{padding:13px;border:1px solid var(--line);border-radius:14px;background:#fafafa}.fieldCard label{display:block;font-weight:850;margin-bottom:7px}.fieldCard input{width:100%;border:1px solid #d8d8d4;background:#fff;border-radius:10px;padding:10px 11px;font:inherit;color:var(--text)}.slugWrap{display:flex;align-items:center;gap:7px}.slugPrefix{color:var(--muted);font-size:13px;white-space:nowrap}.localNote{margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.4}.savedLessons{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}.savedLessonsTitle{font-weight:850;margin-bottom:8px}.savedLessonList{display:flex;flex-wrap:wrap;gap:8px}.savedLessonLink{background:#f0f0ed;padding:8px 10px;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer}
   .countRow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px;margin:14px 0 4px;border:1px solid var(--line);border-radius:14px;background:#fafafa}.countRow label{font-weight:850}.countControl{display:flex;align-items:center;gap:8px}.countControl input{width:76px;border:1px solid #d8d8d4;background:#fff;border-radius:10px;padding:10px 11px;font:inherit;text-align:center}
   .editGrid{display:grid;gap:10px;margin-top:18px}.editRow{display:grid;grid-template-columns:44px 1fr 110px;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:14px;background:#fafafa}.rowNum{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-weight:900;background:#ececea}.editRow input{width:100%;border:1px solid #d8d8d4;background:#fff;border-radius:10px;padding:10px 11px;font:inherit;color:var(--text)}.minutesWrap{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:13px}.minutesWrap input{width:66px;text-align:center}
-  .modalActions{display:grid;grid-template-columns:max-content max-content minmax(0,1fr);gap:10px;align-items:stretch;margin-top:18px}
-  .modalActionsRight{display:contents}
-  .modalActions button{white-space:nowrap}
-  .modalActions .saveBtn{width:100%}
+  .modalActions{display:flex;gap:10px;align-items:stretch;margin-top:18px;flex-wrap:nowrap}
+  .modalActions>button{flex:1 1 0;min-width:0;white-space:normal;line-height:1.15;text-align:center}
+  .modalActionsRight{display:flex;gap:10px;flex:2 1 0;min-width:0}
+  .modalActionsRight button{flex:1 1 0;min-width:0;white-space:normal;line-height:1.15;text-align:center}
+  .modalActions .saveBtn{width:auto}
   .saveBtn{background:#171717;color:#fff}.saveBtn:hover{background:#2a2a2a}
-  @media(max-width:650px){.lessonIdentity{grid-template-columns:1fr}.modalActions{grid-template-columns:1fr}.modalActionsRight{display:contents}.modalActions button{width:100%}}
+  @media(max-width:650px){.lessonIdentity{grid-template-columns:1fr}.modalActions{flex-direction:column}.modalActionsRight{display:flex;flex-direction:column}.modalActions button{width:100%}}
   @media (max-width:800px){.app{padding:20px;border-radius:18px;width:96vw;min-height:92vh}.steps{grid-template-columns:1fr;gap:6px}.step{min-height:38px;font-size:13px}.subrow{font-size:15px}}
