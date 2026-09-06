@@ -15,7 +15,14 @@
   function slugify(value){
     return String(value || '').toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,32);
   }
-  const routeSlug = slugify(location.pathname.split('/').filter(Boolean)[0] || '');
+
+  // Works both on the temporary project URL (.../lesblok/) and later on lesblok.be/.
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const isProjectPath = pathParts[0] === 'lesblok';
+  const basePath = isProjectPath ? '/lesblok/' : '/';
+  const routeSlug = slugify(pathParts[isProjectPath ? 1 : 0] || '');
+  const lessonUrl = slug => basePath + slug;
+
   const storageKey = slug => `lesblok:lesson:${slug}`;
   function readLesson(slug){ if(!slug) return null; try{return JSON.parse(localStorage.getItem(storageKey(slug))||'null')}catch(e){return null} }
   const routeLesson=readLesson(routeSlug);
@@ -32,12 +39,12 @@
   function normalizeCount(value){return Math.max(1,Math.min(8,Math.round(Number(value)||5)))}
   function ensureBlockCount(count){count=normalizeCount(count);while(blocks.length<count){const i=blocks.length;blocks.push(defaultBlocks[i]?{...defaultBlocks[i]}:genericBlock(i))}if(blocks.length>count)blocks=blocks.slice(0,count);blocks.forEach((b,i)=>b.color=palette[i%palette.length])}
   function captureRows(){[...editGrid.querySelectorAll('.editRow')].forEach((row,i)=>{if(!blocks[i])return;const inputs=row.querySelectorAll('input');blocks[i].name=inputs[0].value.trim()||blocks[i].name;blocks[i].minutes=Math.max(1,Math.min(60,Number(inputs[1].value)||blocks[i].minutes))})}
-  function listSavedLessons(){const found=[];for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(!key||!key.startsWith('lesblok:lesson:'))continue;try{const data=JSON.parse(localStorage.getItem(key));const slug=key.replace('lesblok:lesson:','');found.push({slug,name:data?.lessonName||slug})}catch(e){}}found.sort((a,b)=>a.name.localeCompare(b.name));savedLessonList.innerHTML='';if(!found.length){savedLessonList.innerHTML='<span class="localNote">Nog geen lessen bewaard.</span>';return}found.forEach(item=>{const el=document.createElement('button');el.className='savedLessonLink';el.textContent=`${item.name} · /${item.slug}`;el.addEventListener('click',()=>{location.href='/'+item.slug});savedLessonList.appendChild(el)})}
+  function listSavedLessons(){const found=[];for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(!key||!key.startsWith('lesblok:lesson:'))continue;try{const data=JSON.parse(localStorage.getItem(key));const slug=key.replace('lesblok:lesson:','');found.push({slug,name:data?.lessonName||slug})}catch(e){}}found.sort((a,b)=>a.name.localeCompare(b.name));savedLessonList.innerHTML='';if(!found.length){savedLessonList.innerHTML='<span class="localNote">Nog geen lessen bewaard.</span>';return}found.forEach(item=>{const el=document.createElement('button');el.className='savedLessonLink';el.textContent=`${item.name} · /${item.slug}`;el.addEventListener('click',()=>{location.href=lessonUrl(item.slug)});savedLessonList.appendChild(el)})}
   function buildEditor(){lessonNameInput.value=lessonName||'';lessonSlugInput.value=currentSlug||'';blockCountInput.value=blocks.length;editGrid.innerHTML='';blocks.forEach((b,i)=>{const row=document.createElement('div');row.className='editRow';row.innerHTML=`<div class="rowNum">${i+1}</div><input type="text" maxlength="40" value="${b.name.replace(/"/g,'&quot;')}" aria-label="Naam lesblok ${i+1}"><div class="minutesWrap"><input type="number" min="1" max="60" step="1" value="${b.minutes}" aria-label="Minuten lesblok ${i+1}"> min</div>`;editGrid.appendChild(row)});listSavedLessons()}
   function openEditor(){buildEditor();modalBackdrop.classList.add('show')} function closeEditor(){modalBackdrop.classList.remove('show')}
   function applyEditor(){ensureBlockCount(blockCountInput.value);captureRows();lessonName=lessonNameInput.value.trim();running=false;index=0;total=secondsFor(0);remaining=total;lastBeepSecond=null;makeSteps();render()}
   function useOnce(){applyEditor();closeEditor();showToast('Aangepaste les actief. Niet opgeslagen.')}
-  function saveEditor(){applyEditor();let slug=slugify(lessonSlugInput.value||lessonName);if(!slug){showToast('Geef je les eerst een naam of adres.');return}currentSlug=slug;const payload={lessonName:lessonName||slug,blocks:blocks.map(({name,minutes})=>({name,minutes}))};localStorage.setItem(storageKey(slug),JSON.stringify(payload));closeEditor();showToast(`Bewaard als lesblok.be/${slug}`);if(location.pathname!=='/'+slug)history.pushState({},'','/'+slug);listSavedLessons()}
+  function saveEditor(){applyEditor();let slug=slugify(lessonSlugInput.value||lessonName);if(!slug){showToast('Geef je les eerst een naam of adres.');return}currentSlug=slug;const payload={lessonName:lessonName||slug,blocks:blocks.map(({name,minutes})=>({name,minutes}))};localStorage.setItem(storageKey(slug),JSON.stringify(payload));closeEditor();showToast(`Bewaard als lesblok.be/${slug}`);const target=lessonUrl(slug);if(location.pathname!==target)history.pushState({},'',target);listSavedLessons()}
   function restoreExample(){blocks=defaultBlocks.map(b=>({...b}));lessonName='';currentSlug='';buildEditor()}
   blockCountInput.addEventListener('change',()=>{captureRows();ensureBlockCount(blockCountInput.value);buildEditor()});lessonNameInput.addEventListener('input',()=>{if(!lessonSlugInput.dataset.touched)lessonSlugInput.value=slugify(lessonNameInput.value)});lessonSlugInput.addEventListener('input',()=>{lessonSlugInput.dataset.touched='1';lessonSlugInput.value=slugify(lessonSlugInput.value)});
 
