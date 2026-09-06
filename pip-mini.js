@@ -11,9 +11,20 @@
     notify.t = setTimeout(() => toast.classList.remove('show'), ms);
   }
 
+  function returnToFull(){
+    try{
+      if(floatingWindow && !floatingWindow.closed) floatingWindow.close();
+    }catch(e){}
+    clearInterval(syncTimer);
+    syncTimer = null;
+    floatingWindow = null;
+    // This handler is triggered by a direct user click in the PiP window,
+    // so Chrome can bring the original Lesblok window back to the front.
+    try{ window.focus(); }catch(e){}
+    setTimeout(() => { try{ window.focus(); }catch(e){} }, 60);
+  }
+
   function miniMarkup(doc){
-    // Build the PiP document without document.open()/document.write().
-    // That is more reliable for Document Picture-in-Picture windows.
     doc.title = 'Lesblok mini';
     doc.head.innerHTML = '';
     doc.body.innerHTML = '';
@@ -23,7 +34,7 @@
       *{box-sizing:border-box}
       html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;color:#171717;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
       body{display:flex;align-items:center}
-      .box{width:100%;padding:16px 18px 13px}
+      .box{width:100%;padding:14px 16px 12px}
       .top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
       .title{font-size:22px;font-weight:900;letter-spacing:-.025em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .wrap{font-size:11px;font-weight:900;color:#ff9a3c;visibility:hidden;white-space:nowrap}
@@ -34,6 +45,7 @@
       .next{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .controls{display:flex;gap:5px;flex:0 0 auto}
       button{border:0;border-radius:8px;padding:5px 8px;font:inherit;font-weight:850;background:#efefec;color:#171717;cursor:pointer}
+      button.full{background:#171717;color:#fff;padding-inline:10px}
     `;
     doc.head.appendChild(style);
 
@@ -44,7 +56,7 @@
       <div class="bar"><div class="fill" id="pipFill"></div></div>
       <div class="bottom">
         <div class="next" id="pipNext">Next</div>
-        <div class="controls"><button id="pipPlus">+1</button><button id="pipPause">Ⅱ</button><button id="pipNextBtn">NEXT</button></div>
+        <div class="controls"><button id="pipPlus">+1</button><button id="pipPause">Ⅱ</button><button id="pipNextBtn">NEXT</button><button class="full" id="pipFull">FULL</button></div>
       </div>`;
     doc.body.appendChild(box);
 
@@ -56,6 +68,7 @@
       if(pause && !pause.disabled) pause.click();
       else start?.click();
     };
+    doc.getElementById('pipFull').onclick = returnToFull;
   }
 
   function syncMini(){
@@ -91,9 +104,9 @@
       if(floatingWindow && !floatingWindow.closed) floatingWindow.close();
 
       floatingWindow = await window.documentPictureInPicture.requestWindow({
-        width:470,
+        width:520,
         height:175,
-        disallowReturnToOpener:true,
+        disallowReturnToOpener:false,
         preferInitialWindowPlacement:true
       });
 
@@ -108,7 +121,7 @@
         floatingWindow = null;
       }, {once:true});
 
-      notify('MINI staat nu in Picture-in-Picture en hoort boven andere vensters te blijven.');
+      notify('MINI staat nu in Picture-in-Picture. Klik FULL in de mini om terug te keren.');
     } catch(err){
       console.error('Document Picture-in-Picture failed:', err);
       const reason = err?.name === 'NotAllowedError'
@@ -120,7 +133,6 @@
     }
   }
 
-  // Replace MINI so the old compact-mode event listener is removed.
   const oldMini = document.getElementById('miniBtn');
   if(oldMini){
     const mini = oldMini.cloneNode(true);
@@ -130,6 +142,5 @@
     mini.addEventListener('click', openFloatingMini);
   }
 
-  // No misleading ordinary popup button anymore.
   document.getElementById('popBtn')?.remove();
 })();
